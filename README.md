@@ -28,3 +28,7 @@ or
 - Make sure you have MusicBee selected to be displayed as your Game Activity on Discord
   - User Settings -> Games -> Display currently running game as status message.
   - Add it! -> Select MusicBee
+
+## Support
+
+Feel free to contact me (Kuunikal) on Discord if you need help. My info is in the screenshot.
