@@ -24,9 +24,9 @@ namespace MusicBeePlugin
             about.Author = "Harmon758 + Kuunikal";
             about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
             about.Type = PluginType.General;
-            about.VersionMajor = 2;  // your plugin version
+            about.VersionMajor = 1;  // your plugin version
             about.VersionMinor = 0;
-            about.Revision = 2;
+            about.Revision = 05; // this how you do it?
             about.MinInterfaceVersion = MinInterfaceVersion;
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
@@ -43,6 +43,7 @@ namespace MusicBeePlugin
             handlers.readyCallback = HandleReadyCallback;
             handlers.errorCallback = HandleErrorCallback;
             handlers.disconnectedCallback = HandleDisconnectedCallback;
+			// Kuunikal's dev app client ID
             DiscordRPC.Initialize("432174690857910272", ref handlers, true, null);
         }
 
@@ -54,22 +55,41 @@ namespace MusicBeePlugin
         {
             DiscordRPC.RichPresence presence = new DiscordRPC.RichPresence();
 
+			/* Discord RPC doesn't like strings that are only one character long, so I
+			   add a space after each track to make sure it's over 1 character long */
 			track = Utility.Utf16ToUtf8(track + " ");
-			artist = Utility.Utf16ToUtf8("by " + artist);
+			artist = Utility.Utf16ToUtf8("by " + artist);               // Next line, shows the artist
+			// There are characters at the end of each line which Discord renders poorly 
+			// (side-effect of Utf8, I guess?) so we need touse a substring instead
 			presence.state = artist.Substring(0, artist.Length - 1);
 			presence.details = track.Substring(0, track.Length - 1);
+
+			// Hovering over the image presents the album name
 			presence.largeImageText = album;
-			
-			char[] albumArray = album.ToCharArray();
+
+			/* Next block  is fetching the album image from Discord's 
+			   server. They don't allow spaces in their file names, so 
+			   we need to convert them into underscores. */
+
+			char[] albumArray = album.ToCharArray();    // Create a char array because we can't edit strings
+
+			// Search album string for spaces
 			for (int i = 0; i < album.Length; i++)
 			{
+				// If the current character is a space, turn it into an underscore
 				if (album[i] == ' ') albumArray[i] = '_';
+				// Otherwise, just continue on
 				else albumArray[i] = album[i];
 			}
+			// Create a string from the array, in lowercase
 			string newAlbum = new String(albumArray).ToLower();
+			// Set the album art to the manipulated album string.
 			presence.largeImageKey = newAlbum;
+
+			// Set the small image to the playback status.
 			if (playing) presence.smallImageKey = "playing";
 			else presence.smallImageKey = "paused";
+
             DiscordRPC.UpdatePresence(ref presence);
         }
 
@@ -123,6 +143,7 @@ namespace MusicBeePlugin
             string duration = mbApiInterface.NowPlaying_GetFileProperty(FilePropertyType.Duration);
             // mbApiInterface.NowPlaying_GetDuration();
             int position = mbApiInterface.Player_GetPosition();
+			// Check if there isn't an artist for the current song. If so, replace it with "(unknown artist)".
             if (string.IsNullOrEmpty(artist)) { artist = "(unknown artist)"; }
             // perform some action depending on the notification type
             switch (type)
