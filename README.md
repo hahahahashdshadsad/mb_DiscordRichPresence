@@ -1,8 +1,8 @@
 # Discord Rich Presence Plugin for MusicBee
 
-This [MusicBee](http://getmusicbee.com) plugin shows your currently playing song as Rich Presence on [Discord](https://discordapp.com/)
+This [MusicBee](http://getmusicbee.com) plugin shows your currently playing song as Rich Presence on [Discord](https://discordapp.com/).
 
-![Example Screenshot](https://i.imgur.com/WzGCCPk.png)
+![Example Screenshot](https://i.imgur.com/cTKx7p8.png)
 
 ## Requirements
 
@@ -11,7 +11,7 @@ This [MusicBee](http://getmusicbee.com) plugin shows your currently playing song
 
 ## Installation
 
-- Download the (non-source code) zip file from the [latest release](https://github.com/Harmon758/mb_DiscordRichPresence/releases/latest)
+- Download the (non-source code) zip file from the [latest release](https://github.com/Kuunikal/mb_DiscordRichPresence/releases/latest)
 
 Either
 - Load the plugin through MusicBee
