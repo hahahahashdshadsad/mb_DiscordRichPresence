@@ -21,10 +21,10 @@ namespace MusicBeePlugin
             about.PluginInfoVersion = PluginInfoVersion;
             about.Name = "Discord Rich Presence";
             about.Description = "Sets currently playing song as Discord Rich Presence";
-            about.Author = "Harmon758";
+            about.Author = "Harmon758 + Kuunikal";
             about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
             about.Type = PluginType.General;
-            about.VersionMajor = 1;  // your plugin version
+            about.VersionMajor = 2;  // your plugin version
             about.VersionMinor = 0;
             about.Revision = 2;
             about.MinInterfaceVersion = MinInterfaceVersion;
@@ -43,25 +43,33 @@ namespace MusicBeePlugin
             handlers.readyCallback = HandleReadyCallback;
             handlers.errorCallback = HandleErrorCallback;
             handlers.disconnectedCallback = HandleDisconnectedCallback;
-            DiscordRPC.Initialize("381981355539693579", ref handlers, true, null);
+            DiscordRPC.Initialize("432174690857910272", ref handlers, true, null);
         }
 
         private void HandleReadyCallback() { }
         private void HandleErrorCallback(int errorCode, string message) { }
         private void HandleDisconnectedCallback(int errorCode, string message) { }
 
-        private void UpdatePresence(string song, string duration, int position, string state = "Listening to music")
+        private void UpdatePresence(string artist, string track, string album, string duration, Boolean playing)
         {
             DiscordRPC.RichPresence presence = new DiscordRPC.RichPresence();
-            presence.state = state;
-            song = Utility.Utf16ToUtf8(song);
-            presence.details = song.Substring(0, song.Length - 1);
-            presence.largeImageKey = "musicbee";
-            long now = (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-            presence.startTimestamp = now - position;
-            // string[] durations = duration.Split(':');
-            // long end = now + System.Convert.ToInt64(durations[0]) * 60 + System.Convert.ToInt64(durations[1]);
-            // presence.endTimestamp = end;
+
+			track = Utility.Utf16ToUtf8(track + " ");
+			artist = Utility.Utf16ToUtf8("by " + artist);
+			presence.state = artist.Substring(0, artist.Length - 1);
+			presence.details = track.Substring(0, track.Length - 1);
+			presence.largeImageText = album;
+			
+			char[] albumArray = album.ToCharArray();
+			for (int i = 0; i < album.Length; i++)
+			{
+				if (album[i] == ' ') albumArray[i] = '_';
+				else albumArray[i] = album[i];
+			}
+			string newAlbum = new String(albumArray).ToLower();
+			presence.largeImageKey = newAlbum;
+			if (playing) presence.smallImageKey = "playing";
+			else presence.smallImageKey = "paused";
             DiscordRPC.UpdatePresence(ref presence);
         }
 
@@ -111,11 +119,11 @@ namespace MusicBeePlugin
         {
             string artist = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Artist);
             string trackTitle = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.TrackTitle);
+			string album = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Album);
             string duration = mbApiInterface.NowPlaying_GetFileProperty(FilePropertyType.Duration);
             // mbApiInterface.NowPlaying_GetDuration();
             int position = mbApiInterface.Player_GetPosition();
-            string song = artist + " - " + trackTitle;
-            if (string.IsNullOrEmpty(artist)) { song = trackTitle; }
+            if (string.IsNullOrEmpty(artist)) { artist = "(unknown artist)"; }
             // perform some action depending on the notification type
             switch (type)
             {
@@ -125,15 +133,15 @@ namespace MusicBeePlugin
                     switch (mbApiInterface.Player_GetPlayState())
                     {
                         case PlayState.Playing:
-                            UpdatePresence(song, duration, position / 1000);
+                            UpdatePresence(artist, trackTitle, album, duration, true);
                             break;
                         case PlayState.Paused:
-                            UpdatePresence(song, duration, 0, state: "Paused");
+                            UpdatePresence(artist, trackTitle, album, duration, false);
                             break;
                     }
                     break;
                 case NotificationType.TrackChanged:
-                    UpdatePresence(song, duration, 0);
+                    UpdatePresence(artist, trackTitle, album, duration, true);
                     break;
             }
         }
