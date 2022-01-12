@@ -44,7 +44,7 @@ namespace MusicBeePlugin
             handlers.errorCallback = HandleErrorCallback;
             handlers.disconnectedCallback = HandleDisconnectedCallback;
 			// Kuunikal's dev app client ID
-            DiscordRPC.Initialize("432174690857910272", ref handlers, true, null);
+            DiscordRPC.Initialize("930949546484322334", ref handlers, true, null);
         }
 
         private void HandleReadyCallback() { }
